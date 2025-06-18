@@ -7,7 +7,7 @@ import (
 	todo "github.com/zenmaster911/shelfAPI"
 )
 
-func (h *Handler) creatList(c *gin.Context) {
+func (h *Handler) createList(c *gin.Context) {
 	// id, ok := c.Get(userCtx)
 	// if !ok {
 	// 	newErrorResponse(c, http.StatusInternalServerError, "user blblbl")

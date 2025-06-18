@@ -41,7 +41,7 @@ func getUserId(c *gin.Context) (int, error) {
 
 	idInt, ok := id.(int)
 	if !ok {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		newErrorResponse(c, http.StatusInternalServerError, "user id is of invalid type")
 		return 0, errors.New("user id not found")
 	}
 	return idInt, nil
