@@ -75,7 +75,27 @@ func (h *Handler) getListById(c *gin.Context) {
 }
 
 func (h *Handler) updateList(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		return
+	}
 
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("error in update list method: invalid id param, %v", err))
+	}
+
+	var input todo.UpdateListInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("error in update list method: %s", err))
+		return
+	}
+
+	if err := h.services.Update(userId, id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("error in update list method: %s", err))
+		return
+	}
+	c.JSON(http.StatusOK, statusResponse{"ok"})
 }
 
 func (h *Handler) deleteList(c *gin.Context) {
