@@ -1,20 +1,15 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	todo "github.com/zenmaster911/shelfAPI"
 )
 
 func (h *Handler) createList(c *gin.Context) {
-	// id, ok := c.Get(userCtx)
-	// if !ok {
-	// 	newErrorResponse(c, http.StatusInternalServerError, "user blblbl")
-	// }
-	// c.JSON(http.StatusOK, map[string]interface{}{
-	// 	"id": id,
-	// })
 
 	userId, err := getUserId(c)
 	if err != nil {
@@ -38,11 +33,44 @@ func (h *Handler) createList(c *gin.Context) {
 	})
 }
 
-func (h *Handler) getAllLists(c *gin.Context) {
+type getAllListsResponse struct {
+	Data []todo.TodoList `json:"data"`
+}
 
+func (h *Handler) getAllLists(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		return
+	}
+	lists, err := h.services.TodoList.GetAll(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, getAllListsResponse{
+		Data: lists,
+	})
 }
 
 func (h *Handler) getListById(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("error in getListById method: invalid id param, %v", err))
+	}
+
+	list, err := h.services.TodoList.GetById(userId, id)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, list)
 
 }
 
@@ -51,5 +79,23 @@ func (h *Handler) updateList(c *gin.Context) {
 }
 
 func (h *Handler) deleteList(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		return
+	}
 
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("error in getListById method: invalid id param, %v", err))
+	}
+
+	err = h.services.TodoList.Delete(userId, id)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
 }
